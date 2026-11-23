@@ -46,9 +46,6 @@ fun Pasos(
             state = lista,
         ) {
             when (pasos.sensor) {
-                SensorPasos.NO_DISPONIBLE -> item {
-                    Aviso("Este reloj no tiene contador de pasos")
-                }
                 SensorPasos.SIN_PERMISO -> {
                     item { Aviso("Permite el sensor de actividad para contar pasos") }
                     item {
@@ -60,7 +57,8 @@ fun Pasos(
                         )
                     }
                 }
-                SensorPasos.ACTIVO -> {
+                // Sin podómetro (el emulador) se muestran igual los pasos sumados desde Desarrollo.
+                SensorPasos.ACTIVO, SensorPasos.NO_DISPONIBLE -> {
                     item { EstadoMovimiento(pasos.movimiento) }
                     item {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -93,6 +91,9 @@ fun Pasos(
                             style = MaterialTheme.typography.caption2,
                             color = ColoresRacha.acento,
                         )
+                    }
+                    if (pasos.sensor == SensorPasos.NO_DISPONIBLE) {
+                        item { Aviso("Sin podómetro: suma pasos en Desarrollo") }
                     }
                     if (pasos.demo) {
                         item {
