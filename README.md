@@ -1,23 +1,39 @@
+<div align="center">
+
 # Racha
 
-**Hábitos desde el reloj.** Racha es una app para **Wear OS**: marcas una actividad cumplida,
-ganas puntos, subes de nivel y mantienes una racha de días seguidos. Además usa el contador de
-pasos del reloj para saber si estás caminando o corriendo, y marca sola la caminata del día.
+**Hábitos desde el reloj.**
+
+App para **Wear OS**: marcas una actividad cumplida, ganas puntos, subes de nivel y mantienes
+una racha de días seguidos. Además usa el contador de pasos del reloj para saber si estás
+caminando o corriendo, y marca sola la caminata del día.
+
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?logo=kotlin&logoColor=white)
+![Wear OS](https://img.shields.io/badge/Wear%20OS-API%2030%2B-4285F4?logo=wearos&logoColor=white)
+![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Wear%201.5-4CAF50?logo=jetpackcompose&logoColor=white)
+![Sin internet](https://img.shields.io/badge/funciona-sin%20internet-222222)
+
+<img src="docs/portada.png" alt="Las cuatro páginas principales de Racha: Progreso, Hoy, Pasos y Logros" width="100%">
+
+*Progreso · Hoy · Pasos · Logros, capturadas en el emulador Wear OS Large Round.*
+
+</div>
 
 Todo corre en el reloj: no necesita internet, cuentas ni celular. El progreso se guarda con
 DataStore y sigue ahí al cerrar la app.
 
 Proyecto final de **Diseño de Interfaces de Software**.
 
-## Tecnologías
+## Contenido
 
-| | |
-|---|---|
-| Lenguaje | Kotlin |
-| Plataforma | Wear OS (API 30 o superior) |
-| Interfaz | Jetpack Compose para Wear OS |
-| Datos | DataStore Preferences + kotlinx.serialization |
-| Sensores | Contador de pasos (`TYPE_STEP_COUNTER`) y vibración |
+- [Funciones](#funciones)
+- [Cómo se usa](#cómo-se-usa)
+- [Pantallas](#pantallas)
+- [Reglas del juego](#reglas-del-juego)
+- [Cómo ejecutarlo](#cómo-ejecutarlo)
+- [Opciones de desarrollo](#opciones-de-desarrollo)
+- [Decisiones de diseño](#decisiones-de-diseño)
+- [Estructura](#estructura)
 
 ## Funciones
 
@@ -30,20 +46,91 @@ Proyecto final de **Diseño de Interfaces de Software**.
 - **Registro automático** de *Caminar 20 min* al llegar a la meta de pasos.
 - **Vibraciones distintas** para registrar, cumplir la meta y desbloquear un logro.
 
+## Tecnologías
+
+| | |
+|---|---|
+| Lenguaje | Kotlin |
+| Plataforma | Wear OS (API 30 o superior) |
+| Interfaz | Jetpack Compose para Wear OS |
+| Datos | DataStore Preferences + kotlinx.serialization |
+| Sensores | Contador de pasos (`TYPE_STEP_COUNTER`) y vibración |
+
+## Cómo se usa
+
+Así se ve registrar un hábito, desde que abres la app hasta que vuelves a Hoy. Son dos toques.
+
+<table>
+  <tr>
+    <td align="center" width="25%"><img src="docs/capturas/00-hoy-inicio.png" width="190"><br><b>1. Hoy</b><br><sub>Al empezar el día el anillo está vacío. Tocas <i>Registrar</i>.</sub></td>
+    <td align="center" width="25%"><img src="docs/capturas/02-actividades.png" width="190"><br><b>2. ¿Qué cumpliste?</b><br><sub>Eliges la actividad. Cada una muestra sus puntos.</sub></td>
+    <td align="center" width="25%"><img src="docs/capturas/06-confirmacion.png" width="190"><br><b>3. Confirmación</b><br><sub>Palomita, puntos ganados y un toque de vibración.</sub></td>
+    <td align="center" width="25%"><img src="docs/capturas/07-celebracion.png" width="190"><br><b>4. Logro</b><br><sub>Si desbloqueaste un logro, se celebra antes de volver a Hoy.</sub></td>
+  </tr>
+</table>
+
+Con varios días seguidos, la racha empieza a dar puntos extra y el anillo se llena más rápido:
+
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="docs/capturas/06b-confirmacion-bono.png" width="190"><br><b>Bono de racha</b><br><sub>Con 5 días, <i>Meditar</i> da 15 puntos y 7 más por la racha.</sub></td>
+    <td align="center" width="33%"><img src="docs/capturas/01-hoy.png" width="190"><br><b>Cerca de la meta</b><br><sub>44 de 50 puntos y una racha de 5 días.</sub></td>
+    <td align="center" width="33%"><img src="docs/capturas/08-caminar-auto.png" width="190"><br><b>Caminar, sola</b><br><sub>Al llegar a la meta de pasos, la caminata se registra sin tocar nada.</sub></td>
+  </tr>
+</table>
+
 ## Pantallas
 
 Las pantallas principales son páginas horizontales: **Progreso ← Hoy → Pasos → Logros**. La
 app abre en Hoy, y para volver atrás se desliza desde el borde izquierdo.
 
-| Pantalla | Qué muestra |
-|---|---|
-| Hoy | Anillo con los puntos del día contra la meta de 50, el nivel, la racha y el botón *Registrar* |
-| Actividades | Las siete actividades. Las cumplidas hoy aparecen atenuadas y con palomita |
-| Confirmación | Palomita, actividad y puntos ganados. Vuelve sola a Hoy en 1,8 s |
-| Progreso | Nivel, barra hacia el siguiente, experiencia, rachas y los últimos 7 días |
-| Pasos | Pasos de hoy, ritmo en pasos/min, estado (quieto, caminando o corriendo) y avance hacia *Caminar* |
-| Logros | Los ocho logros y cuántos llevas desbloqueados |
-| Celebración | El logro recién desbloqueado |
+```mermaid
+flowchart LR
+    P[Progreso] <--> H((Hoy))
+    H <--> S[Pasos]
+    S <--> L[Logros]
+    H -- Registrar --> A[Actividades]
+    A -- toca una --> C[Confirmación]
+    C -- 1,8 s --> H
+    C -- logro nuevo --> X[Celebración]
+    X --> H
+    H -. mantener el nivel 2 s .-> D[Desarrollo]
+```
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/capturas/01-hoy.png" width="200"><br><b>Hoy</b></td>
+    <td>Anillo con los puntos del día contra la meta de 50. A la izquierda el nivel y a la derecha la racha. Abajo, el único botón: <i>Registrar</i>.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/capturas/02b-actividades-lista.png" width="200"><br><b>Actividades</b></td>
+    <td>Las siete actividades en una lista que sigue la curva de la pantalla: lo del centro se ve grande y lo de los bordes se encoge. Las cumplidas hoy aparecen atenuadas y con palomita.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/capturas/06-confirmacion.png" width="200"><br><b>Confirmación</b></td>
+    <td>Palomita, actividad y puntos ganados, más el bono de racha y el logro si los hay. Vuelve sola a Hoy en 1,8 s.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/capturas/03-progreso.png" width="200"><br><b>Progreso</b></td>
+    <td>Nivel actual, barra hacia el siguiente, experiencia total, racha y mejor racha.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/capturas/03b-progreso-semana.png" width="200"><br><b>Progreso: semana</b></td>
+    <td>Más abajo, los puntos de los últimos 7 días en barras. El día de hoy va resaltado en menta.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/capturas/04-pasos.png" width="200"><br><b>Pasos</b></td>
+    <td>Pasos de hoy, estado (quieto, caminando o corriendo) y avance hacia el registro automático de <i>Caminar</i>. En el emulador avisa que no hay podómetro y que se pueden sumar pasos en Desarrollo.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/capturas/05-logros.png" width="200"><br><b>Logros</b></td>
+    <td>Los ocho logros y cuántos llevas. Los desbloqueados se ven en ámbar con su fecha; los pendientes, en gris con su condición.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/capturas/07-celebracion.png" width="200"><br><b>Celebración</b></td>
+    <td>El logro recién desbloqueado, con tres vibraciones ascendentes. Se cierra sola o con un toque.</td>
+  </tr>
+</table>
 
 ## Reglas del juego
 
@@ -129,16 +216,24 @@ porque OneDrive choca con los miles de archivos temporales de Gradle (está conf
 
 ## Opciones de desarrollo
 
+<img src="docs/capturas/09-desarrollo.png" width="200" align="right" alt="Pantalla de desarrollo">
+
 En la pantalla Hoy, **mantén pulsada la insignia de nivel durante 2 segundos**. Se abre una
 pantalla con opciones para la demostración:
 
+- **Sumar 100 puntos**: suma experiencia para ver cómo se sube de nivel.
 - **Meta pasos: 2000 / 30**: alterna la meta normal y el modo demo, que pide solo 30 pasos
   para mostrar el registro automático caminando unos segundos.
 - **Sumar 100 pasos**: suma pasos sin caminar. Sirve en el emulador.
-- **Sumar 100 puntos**: suma experiencia para ver cómo se sube de nivel.
 - **Simular día anterior**: mueve todos los registros un día hacia atrás, como si ya fuera
   mañana. Sirve para mostrar cómo crece la racha sin esperar días reales.
 - **Reiniciar todo**: borra el progreso.
+
+Las capturas de este README se hicieron así: con *Simular día anterior* se armó una racha de
+cinco días, con *Sumar 100 puntos* se subió al nivel 3 y con *Sumar 100 pasos* se llenó la
+barra de pasos.
+
+<br clear="right">
 
 ## Decisiones de diseño
 
@@ -149,6 +244,12 @@ donde un píxel negro está apagado: no consume energía y la batería dura más
 de la pantalla se pierde contra el marco del reloj y la interfaz parece flotar. Por eso los
 colores de acción (menta, ámbar y azul claro) son claros y saturados: sobre negro un color
 oscuro desaparece, y un reloj se mira de reojo, muchas veces bajo el sol.
+
+| Color | Uso |
+|---|---|
+| ![](https://img.shields.io/badge/-menta-7BE0AD) | Acción y progreso: botón *Registrar*, anillo, puntos ganados |
+| ![](https://img.shields.io/badge/-%C3%A1mbar-FFB77D) | Racha y logros |
+| ![](https://img.shields.io/badge/-azul%20claro-9FC9FF) | Nivel y experiencia |
 
 ### Páginas horizontales en vez de un menú
 
@@ -163,7 +264,8 @@ hay botones de retroceso propios.
 
 Las listas usan `ScalingLazyColumn`. Los elementos de los extremos se encogen y se desvanecen
 siguiendo la curva de la pantalla, de modo que lo que está al centro, que es lo legible, se ve
-grande. También responde a la corona giratoria sin código extra.
+grande. También responde a la corona giratoria sin código extra. Se nota en la captura de
+[Actividades](#pantallas): *Caminar* y *Dormir* se achican en los bordes.
 
 ### Pasos con el contador del reloj
 
@@ -197,6 +299,10 @@ app/src/main/java/com/racha/
 ├── datos/                  modelos, semilla, repositorio DataStore y podómetro
 ├── logica/                 niveles, racha y logros: funciones puras
 └── ui/                     tema, iconos, vibración, navegación, componentes y pantallas
+
+docs/
+├── portada.png             imagen de portada de este README
+└── capturas/               capturas de cada pantalla
 ```
 
 La lógica de `logica/` no depende de Android ni de Compose. Sus pruebas están en
